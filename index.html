@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+  <meta charset="UTF-8">
+  <title>ver 5</title>
+  
+
+</head>
+<body>
+<!-- partial:index.partial.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Health Tracker</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .container {
+            width: 80%;
+            max-width: 1200px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        .buttons {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .progress-bar {
+            position: relative;
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 20px;
+            margin-top: 20px;
+        }
+        .progress-bar-inner {
+            height: 100%;
+            background-color: #4caf50;
+            text-align: right;
+            line-height: 20px;
+            color: white;
+            padding-right: 10px;
+        }
+        .pointer {
+            position: absolute;
+            top: -15px;
+            width: 10px;
+            height: 10px;
+            background-color: red;
+            border-radius: 50%;
+        }
+        .calorie-label {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 10px;
+        }
+        .confetti {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 1000;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Health Tracker</h1>
+        <div class="buttons">
+            <button id="setGoalButton" onclick="navigateToPage('setGoalPage')">Set Calorie Goal</button>
+            <button id="logMealButton" onclick="navigateToPage('logMealPage')">Log Meal</button>
+            <button id="dailyReportButton" onclick="navigateToPage('dailyReportPage')">Daily Report</button>
+        </div>
+        <div id="content">
+            <!-- Dynamic content will be loaded here -->
+        </div>
+    </div>
+    <div class="confetti" id="confetti"></div>
+
+    <script>
+        let calorieGoal = 2000;
+        let currentCalories = 0;
+        let meals = [];
+
+        function navigateToPage(page) {
+            const contentDiv = document.getElementById('content');
+            contentDiv.innerHTML = '';
+
+            if (page === 'setGoalPage') {
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.placeholder = 'Enter your calorie goal';
+                const button = document.createElement('button');
+                button.textContent = 'Set Goal';
+                button.onclick = () => {
+                    const goal = parseInt(input.value);
+                    if (goal && goal > 0) {
+                        calorieGoal = goal;
+                        alert(`Calorie goal set to ${calorieGoal} calories.`);
+                    }
+                };
+                contentDiv.appendChild(input);
+                contentDiv.appendChild(button);
+
+            } else if (page === 'logMealPage') {
+                const mealInput = document.createElement('input');
+                mealInput.type = 'text';
+                mealInput.placeholder = 'Meal name';
+
+                const calorieInput = document.createElement('input');
+                calorieInput.type = 'number';
+                calorieInput.placeholder = 'Calories';
+
+                const proteinInput = document.createElement('input');
+                proteinInput.type = 'number';
+                proteinInput.placeholder = 'Proteins (g)';
+
+                const carbInput = document.createElement('input');
+                carbInput.type = 'number';
+                carbInput.placeholder = 'Carbs (g)';
+
+                const fatInput = document.createElement('input');
+                fatInput.type = 'number';
+                fatInput.placeholder = 'Fats (g)';
+
+                const button = document.createElement('button');
+                button.textContent = 'Log Meal';
+                button.onclick = () => {
+                    const meal = mealInput.value;
+                    const calories = parseInt(calorieInput.value);
+                    const proteins = parseInt(proteinInput.value) || 0;
+                    const carbs = parseInt(carbInput.value) || 0;
+                    const fats = parseInt(fatInput.value) || 0;
+
+                    if (meal && calories > 0) {
+                        meals.push({ meal, calories, proteins, carbs, fats });
+                        currentCalories += calories;
+                        alert(`${meal} logged with ${calories} calories.`);
+
+                        if (currentCalories >= calorieGoal) {
+                            launchConfetti();
+                        }
+                    }
+                };
+
+                contentDiv.appendChild(mealInput);
+                contentDiv.appendChild(calorieInput);
+                contentDiv.appendChild(proteinInput);
+                contentDiv.appendChild(carbInput);
+                contentDiv.appendChild(fatInput);
+                contentDiv.appendChild(button);
+
+            } else if (page === 'dailyReportPage') {
+                const report = document.createElement('div');
+                report.innerHTML = `<h2>Daily Report</h2>
+                                    <p>Total Calories Consumed: ${currentCalories} Calories</p>
+                                    <p>Calorie Goal: ${calorieGoal} Calories</p>`;
+
+                let totalProteins = 0;
+                let totalCarbs = 0;
+                let totalFats = 0;
+
+                meals.forEach(meal => {
+                    totalProteins += meal.proteins;
+                    totalCarbs += meal.carbs;
+                    totalFats += meal.fats;
+                });
+
+                report.innerHTML += `<p>Total Proteins: ${totalProteins}g</p>
+                                     <p>Total Carbs: ${totalCarbs}g</p>
+                                     <p>Total Fats: ${totalFats}g</p>`;
+
+                // Create pie chart container
+                const canvas = document.createElement('canvas');
+                canvas.id = 'macroPieChart';
+                canvas.style.maxWidth = '500px';
+                canvas.style.margin = '20px auto';
+
+                report.appendChild(canvas);
+
+                // Render pie chart
+                setTimeout(() => {
+                    const ctx = document.getElementById('macroPieChart').getContext('2d');
+                    new Chart(ctx, {
+                        type: 'pie',
+                        data: {
+                            labels: ['Proteins (g)', 'Carbohydrates (g)', 'Fats (g)'],
+                            datasets: [{
+                                data: [totalProteins, totalCarbs, totalFats],
+                                backgroundColor: ['#36A2EB', '#FFCE56', '#FF6384']
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'top'
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(tooltipItem) {
+                                            const total = totalProteins + totalCarbs + totalFats;
+                                            const percentage = ((tooltipItem.raw / total) * 100).toFixed(2);
+                                            return `${tooltipItem.label}: ${tooltipItem.raw}g (${percentage}%)`;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    });
+                }, 0);
+
+                const progressBar = document.createElement('div');
+                progressBar.className = 'progress-bar';
+                const progressBarInner = document.createElement('div');
+                progressBarInner.className = 'progress-bar-inner';
+                progressBarInner.style.width = `${Math.min((currentCalories / calorieGoal) * 100, 100)}%`;
+
+                const pointer = document.createElement('div');
+                pointer.className = 'pointer';
+                pointer.style.left = `${Math.min((currentCalories / calorieGoal) * 100, 100)}%`;
+
+                progressBar.appendChild(progressBarInner);
+                progressBar.appendChild(pointer);
+
+                // Add progress bar with labels on left and right
+                const calorieLabel = document.createElement('div');
+                calorieLabel.className = 'calorie-label';
+                calorieLabel.innerHTML = `<span>${currentCalories} calories consumed</span><span>${calorieGoal} calories</span>`;
+
+                report.appendChild(calorieLabel);
+                report.appendChild(progressBar);
+
+                // Display congratulatory message if goal is achieved
+                if (currentCalories >= calorieGoal) {
+                    const congratsMessage = document.createElement('p');
+                    congratsMessage.style.fontWeight = 'bold';
+                    congratsMessage.style.color = '#4caf50';
+                    congratsMessage.textContent = 'Congratulations! You achieved your goal';
+                    report.appendChild(congratsMessage);
+                }
+
+                contentDiv.appendChild(report);
+            }
+        }
+
+        function launchConfetti() {
+            const confettiElement = document.getElementById('confetti');
+            for (let i = 0; i < 100; i++) {
+                const confettiPiece = document.createElement('div');
+                confettiPiece.style.position = 'absolute';
+                confettiPiece.style.top = `${Math.random() * 100}%`;
+                confettiPiece.style.left = `${Math.random() * 100}%`;
+                confettiPiece.style.width = '10px';
+                confettiPiece.style.height = '10px';
+                confettiPiece.style.backgroundColor = `hsl(${Math.random() * 360}, 100%, 50%)`;
+                confettiPiece.style.animation = `fall ${Math.random() * 5 + 3}s linear infinite`;
+
+                confettiElement.appendChild(confettiPiece);
+            }
+        }
+    </script>
+</body>
+</html>
+<!-- partial -->
+  
+</body>
+</html>
